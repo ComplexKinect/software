@@ -28,7 +28,7 @@ for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
     frames.append(data)
 
 print("* done recording")
-print(int.from_bytes(frames[0],byteorder='big'))
+# print(int.from_bytes(frames[0],byteorder='little'))
 
 stream.stop_stream()
 stream.close()
