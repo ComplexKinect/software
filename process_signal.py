@@ -17,6 +17,7 @@ if __name__ == '__main__':
     wave = spectrum.make_wave()
     # wave.play('temp.wav')
     spectrum.plot()
+    thinkplot.config(xlabel="Frequency", ylabel="Magnitude")
     thinkplot.show()
 
 
