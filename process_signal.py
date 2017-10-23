@@ -4,6 +4,7 @@ import time
 import thinkdsp
 import thinkplot
 import numpy as np
+import threading
 
 
 def record_sound():
@@ -71,8 +72,15 @@ def process_sound():
 
 if __name__ == '__main__':
     while True:
-        record_sound()
-        process_sound()
+        record = threading.Thread(name='record', target=record_sound)
+        process = threading.Thread(name='process', target=process_sound)
+        try:
+            record.start()
+            process.start()
+        except:
+            print("unable to start thread")
+        record.join()
+        process.join()
     # wave.play('temp.wav')
     # spectrum.plot()
     # thinkplot.show()
