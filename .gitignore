@@ -1,1 +1,3 @@
 pyaudio
+*.wav
+__pychache__
