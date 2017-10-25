@@ -24,7 +24,7 @@ def record_sound():
                     input=True,
                     frames_per_buffer=CHUNK)
 
-    print("* recording")
+    # print("* recording")
 
     frames = []
 
@@ -32,7 +32,7 @@ def record_sound():
         data = stream.read(CHUNK)
         frames.append(data)
 
-    print("* done recording")
+    # print("* done recording")
     # print(int.from_bytes(frames[0],byteorder='little'))
 
     stream.stop_stream()
@@ -68,6 +68,8 @@ def process_sound():
         ans.append(tmp)
     print(ans[1])
 
+def build_output(data):
+    
 
 
 if __name__ == '__main__':
