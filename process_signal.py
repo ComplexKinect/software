@@ -7,8 +7,8 @@ import numpy as np
 import threading
 from serial import Serial, SerialException
 
-
-cxn = Serial('COM7', baudrate=9600)
+PORT = '/dev/ttyACM1'
+cxn = Serial(PORT, baudrate=9600)
 
 def record_sound():
     CHUNK = 1024
@@ -70,6 +70,7 @@ def process_sound():
         tmp.append(amp)
         ans.append(tmp)
     val = build_output(ans)
+    print(int(val))
     cxn.write([int(val)])
 
 def build_output(data):
@@ -78,13 +79,13 @@ def build_output(data):
         if d[1] > maxmag:
             maxmag = d[1]
             maxfreq = d[0]
-    if maxfreq < 2000:
+    if maxfreq < 200:
         return 1
-    elif maxfreq >= 2000 and maxfreq < 4000:
+    elif maxfreq >= 200 and maxfreq < 400:
         return 2
-    elif maxfreq >= 4000 and maxfreq < 6000:
+    elif maxfreq >= 400 and maxfreq < 600:
         return 3
-    elif maxfreq >= 6000:
+    elif maxfreq >= 600:
         return 4
 
 if __name__ == '__main__':
