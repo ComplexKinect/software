@@ -5,7 +5,10 @@ import thinkdsp
 import thinkplot
 import numpy as np
 import threading
+from serial import Serial, SerialException
 
+
+cxn = Serial('COM7', baudrate=9600)
 
 def record_sound():
     CHUNK = 1024
@@ -66,7 +69,8 @@ def process_sound():
         tmp.append(i)
         tmp.append(amp)
         ans.append(tmp)
-    print(ans[1])
+    val = build_output(ans)
+    cxn.write([int(val)])
 
 def build_output(data):
     maxmag = 0
