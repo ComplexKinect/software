@@ -69,8 +69,19 @@ def process_sound():
     print(ans[1])
 
 def build_output(data):
-    
-
+    maxmag = 0
+    for d in data:
+        if d[1] > maxmag:
+            maxmag = d[1]
+            maxfreq = d[0]
+    if maxfreq < 2000:
+        return 1
+    elif maxfreq >= 2000 and maxfreq < 4000:
+        return 2
+    elif maxfreq >= 4000 and maxfreq < 6000:
+        return 3
+    elif maxfreq >= 6000:
+        return 4
 
 if __name__ == '__main__':
     while True:
