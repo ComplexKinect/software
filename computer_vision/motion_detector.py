@@ -44,7 +44,7 @@ def detect_motion():
         # loop over the contours
         for c in cnts:
             # if the contour is too small, ignore it
-            if cv2.contourArea(c) < 700 or cv2.contourArea(c) > 25000:
+            if cv2.contourArea(c) < 2000 or cv2.contourArea(c) > 30000:
                 continue
 
             # compute the bounding box for the contour, draw it on the frame,
@@ -59,13 +59,21 @@ def detect_motion():
         cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
             (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
+        cropped_img = frame[:,:frame.shape[1]//2]
+        cropped_img2 = frame[:,frame.shape[1]//2:]
+
+
         # show the frame and record if the user presses a key
         cv2.imshow("Security Feed", frame)
         cv2.imshow("Thresh", thresh)
         cv2.imshow("Frame Delta", frameDelta)
+        cv2.imshow("cropped image part 1", cropped_img)
+        cv2.imshow("cropped image part 2", cropped_img2)
+
+
         key = cv2.waitKey(1) & 0xFF
 
-        # if the `q` key is pressed, break from the lop
+        # if the `q` key is pressed, break from the loop
         if key == ord("q"):
             break
 
