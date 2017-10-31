@@ -27,14 +27,14 @@ while True:
   # loop over the contours
   for c in cnts:
       # if the contour is too small, ignore it
-      if cv2.contourArea(c) < 2000 or cv2.contourArea(c) > 30000:
+      if cv2.contourArea(c) < 2000:
           continue
 
       # compute the bounding box for the contour, draw it on the frame,
       # and update the text
       (x, y, w, h) = cv2.boundingRect(c)
       cv2.rectangle(t, (x, y), (x + w, y + h), (0, 255, 0), 2)
-  cv2.imshow( winName, t)
+  cv2.imshow( winName, thresh)
 
   # Read next image
   t_minus = t
