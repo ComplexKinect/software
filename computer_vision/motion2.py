@@ -9,41 +9,80 @@ cam = cv2.VideoCapture(0)
 
 winName = "Movement Indicator"
 
-# Read three images first:
-t_minus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
-t = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
-t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
+# Read three images first and crop each into 3 sections:
+t_minus = cam.read()[1]
+cropped_tm = t_minus[:,:t_minus.shape[1]//3]
+cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
+cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
+
+t = cam.read()[1]
+cropped_t = t[:,:t.shape[1]//3]
+cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
+cropped_t3 = t[:,(2*t.shape[1])//3:]
+
+t_plus = cam.read()[1]
+cropped_tp = t_plus[:,:t_plus.shape[1]//3]
+cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
+cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
+
+images = [[cropped_tm, cropped_t, cropped_tp], [cropped_tm2, cropped_t2, cropped_tp2],
+          [cropped_tm3, cropped_t3, cropped_tp3]]
 
 while True:
-  movement = diffImg(t_minus, t, t_plus)
-  # make everything greater than 25 white and less black (binary black
-  # or white)
-  thresh = cv2.threshold(movement, 25, 255, cv2.THRESH_BINARY)[1]
+  text = ""
+  for i, t_list in enumerate(images):
+      t_minus, t, t_plus = t_list
+      movement = diffImg(t_minus, t, t_plus)
+      movement = cv2.cvtColor(movement, cv2.COLOR_RGB2GRAY)
+      # make everything greater than 25 white and less black (binary black
+      # or white)
+      thresh = cv2.threshold(movement, 10, 255, cv2.THRESH_BINARY)[1]
 
-  # dilate the thresholded image to fill in holes, then find contours
-  # on thresholded image
-  thresh = cv2.dilate(thresh, None, iterations=2)
-  _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-  # loop over the contours
-  for c in cnts:
-      # if the contour is too small, ignore it
-      if cv2.contourArea(c) < 2000:
-          continue
+      # dilate the thresholded image to fill in holes, then find contours
+      # on thresholded image
+      thresh = cv2.dilate(thresh, None, iterations=2)
+      _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+      # loop over the contours
+      for c in cnts:
+          # if the contour is too small, ignore it
+          if cv2.contourArea(c) < 500:
+              continue
 
-      # compute the bounding box for the contour, draw it on the frame,
-      # and update the text
-      (x, y, w, h) = cv2.boundingRect(c)
-      cv2.rectangle(t, (x, y), (x + w, y + h), (0, 255, 0), 2)
-  cv2.imshow( winName, thresh)
+          # draw the contours
+          cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
-  # Read next image
-  t_minus = t
-  t = t_plus
-  t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
+          #TODO this is where we will send serial msgs indicating which block motion is sensed in
+          if i == 0:
+              if "left" not in text:
+                  text += "left"
+          if i== 1:
+              if "middle" not in text:
+                  text += "middle"
+          if i == 2:
+              if "right" not in text:
+                  text += "right"
+
+      # Read next image
+      whole_image = cam.read()[1]
+      if i == 0:
+          cropped = whole_image[:,:whole_image.shape[1]//3]
+      elif i == 1:
+          cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
+      elif i == 2:
+          cropped = whole_image[:,(2*whole_image.shape[1])//3:]
+      images[i] = [t, t_plus, cropped]
 
   key = cv2.waitKey(10)
   if key == 27:
     cv2.destroyWindow(winName)
     break
+
+  cv2.putText(images[0][0], "{}".format(text), (10, 20),
+      cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+  cv2.imshow("left pane", images[0][0])
+  cv2.imshow("middle pane", images[1][0])
+  cv2.imshow("right pane", images[2][0])
+
+
 
 print( "Goodbye")
