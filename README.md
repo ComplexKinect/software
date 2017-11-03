@@ -5,10 +5,11 @@ camera mounted with a raspberry pi.
 
 To use our code you need to install opencv and imutils.
 
-pip3 install imutils
+`pip3 install imutils`
 
 To install opencv go to this website <fill in website here>. Extract the files.
 Cd to the folder where you have opencv.
-mkdir build
-cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
-sudo make install
+
+`mkdir build`
+`cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..`
+`sudo make install`
