@@ -17,7 +17,7 @@ and extract the files to your choice of folder, and navigate to that folder.
 
 `mkdir build`
 
-`cd build` #navigate to build folder
+`cd build` <- navigate to build folder
 
 `cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..`
 
