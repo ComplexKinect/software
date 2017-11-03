@@ -109,4 +109,3 @@ def detect_motion():
     print( "Goodbye")
 
 detect_motion()
->>>>>>> bf1e17a10f134826884a6a17364dc8f114576997
