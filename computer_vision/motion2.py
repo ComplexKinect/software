@@ -81,16 +81,11 @@ def detect_motion():
 
           if section1:
               cxn.write([int(11)])
-          else:
-              cxn.write([int(10)])
           if section2:
               cxn.write([int(21)])
-          else:
-              cxn.write([int(20)])
           if section3:
               cxn.write([int(31)])
-          else:
-              cxn.write([int(30)])
+
           # Read next image
           whole_image = cam.read()[1]
           if i == 0:
