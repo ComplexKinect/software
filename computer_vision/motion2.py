@@ -67,17 +67,14 @@ def detect_motion():
                   if "left" not in text:
                       text += "left"
                       section1 = True
-                      cxn.write([int(11)])
               if i== 1:
                   if "middle" not in text:
                       text += "middle"
                       section2 = True
-                      cxn.write([int(21)])
               if i == 2:
                   if "right" not in text:
                       text += "right"
                       section3 = True
-                      cxn.write([int(31)])
 
           if section1:
               cxn.write([int(11)])
