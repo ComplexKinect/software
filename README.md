@@ -1,6 +1,6 @@
 # Complex Kinect Software
 
-We are building a structure that responds to movement in front of it using OpenCV and a
+We are building a structure that responds to motion in front of it using OpenCV and a
 camera mounted with a raspberry pi.
 
 To use our code you must first install imutils, OpenCV and make opencv in order to make OpenCV operate effectively.
