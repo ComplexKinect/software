@@ -13,7 +13,8 @@ Visit [this website](https://sourceforge.net/projects/opencvlibrary/), download
 and extract the files to your choice of folder, and navigate to that folder.
 
 ### Install make opencv:
-#### Make sure you are in the folder when you're keeping OpenCV!
+*Make sure you are in the same folder where you put OpenCV!*
+
 `mkdir build`
 
 `cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..`
