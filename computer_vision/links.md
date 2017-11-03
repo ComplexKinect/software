@@ -5,3 +5,6 @@
 
 ## Speed Detection helpul links
 [Car Speed Detector](https://gregtinkers.wordpress.com/2016/03/25/car-speed-detector/)
+
+## Hook up raspi camera to raspi
+[How to set up camera to raspi](https://www.ics.com/blog/raspberry-pi-camera-module)
