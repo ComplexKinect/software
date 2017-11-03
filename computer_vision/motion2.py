@@ -1,10 +1,13 @@
 import cv2
+# need to install picamera on raspi first
+# from picamera import PiCamera
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
   d2 = cv2.absdiff(t1, t0)
   return cv2.bitwise_and(d1, d2)
 
+# cam = PiCamera()
 cam = cv2.VideoCapture(0)
 
 winName = "Movement Indicator"
@@ -82,7 +85,5 @@ while True:
   cv2.imshow("left pane", images[0][0])
   cv2.imshow("middle pane", images[1][0])
   cv2.imshow("right pane", images[2][0])
-
-
 
 print( "Goodbye")
