@@ -3,15 +3,16 @@ import cv2
 # from picamera import PiCamera
 from serial import Serial, SerialException
 
-PORT = '/dev/ttyACM1'
-cxn = Serial(PORT, baudrate=9600)
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
   d2 = cv2.absdiff(t1, t0)
   return cv2.bitwise_and(d1, d2)
 
-def detect_motion():
+def detect_motion(serial=False):
+    if serial:
+        PORT = '/dev/ttyACM1'
+        cxn = Serial(PORT, baudrate=9600)
     # cam = PiCamera()
     cam = cv2.VideoCapture(0)
 
@@ -54,6 +55,7 @@ def detect_motion():
           thresh = cv2.dilate(thresh, None, iterations=2)
           _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
           # loop over the contours
+
           for c in cnts:
               # if the contour is too small, ignore it
               if cv2.contourArea(c) < 500:
@@ -62,7 +64,6 @@ def detect_motion():
               # draw the contours
               cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
-              #TODO this is where we will send serial msgs indicating which block motion is sensed in
               if i == 0:
                   if "left" not in text:
                       text += "left"
@@ -76,12 +77,13 @@ def detect_motion():
                       text += "right"
                       section3 = True
 
-          if section1:
-              cxn.write([int(11)])
-          if section2:
-              cxn.write([int(21)])
-          if section3:
-              cxn.write([int(31)])
+          if serial:
+              if section1:
+                  cxn.write([int(11)])
+              if section2:
+                  cxn.write([int(21)])
+              if section3:
+                  cxn.write([int(31)])
 
           # Read next image
           whole_image = cam.read()[1]
