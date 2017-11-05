@@ -1,16 +1,23 @@
 # Complex Kinect Software
 
-We are building a structure that responds to movement in front of it using opencv and a
+We are building a structure that responds to motion in front of it using OpenCV and a
 camera mounted with a raspberry pi.
 
-To use our code you need to install opencv and imutils.
+To use our code you must first install imutils, OpenCV and make opencv in order to make OpenCV operate effectively.
 
+### Install imutils:
 `pip3 install imutils`
 
-To install opencv go to this website <fill in website here>. Extract the files.
-Cd to the folder where you have opencv.
+### Install opencv:
+Visit [this website](https://sourceforge.net/projects/opencvlibrary/), download
+and extract the files to your choice of folder, and navigate to that folder.
+
+### Install make opencv:
+*Make sure you are in the same folder where you put OpenCV!*
 
 `mkdir build`
+
+`cd build` <- navigate to build folder
 
 `cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..`
 
