@@ -121,7 +121,7 @@ def detect_motion(serial=False):
           cv2.putText(images[0][0], "{}".format(text), (10, 20),
               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
           print("im showing")
-          cv2.imshow("left pane", t)
+          cv2.imshow("left pane", f.array)
           #cv2.imshow("middle pane", images[1][0])
           #cv2.imshow("right pane", images[2][0])
 
