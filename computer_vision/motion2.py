@@ -1,8 +1,8 @@
 import cv2
-# need to install picamera on raspi first
-# from picamera import PiCamera
+from picamera import PiCamera
 from serial import Serial, SerialException
-
+import io
+import numpy as np
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
@@ -13,23 +13,31 @@ def detect_motion(serial=False):
     if serial:
         PORT = '/dev/ttyACM1'
         cxn = Serial(PORT, baudrate=9600)
-        camera = picamera.PiCamera('video.h264')
-        # cam = cv2.VideoCapture(0)
+
+    cam = picamera.PiCamera()
+    # Create the in-memory stream
+    stream = io.BytesIO()
+    camera.start_preview()
+    time.sleep(2)
+    camera.capture(stream, format='jpeg')
 
     winName = "Movement Indicator"
 
     # Read three images first and crop each into 3 sections:
-    t_minus = cam.read()[1]
+    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+    t_minus = cv2.imdecode(data, 1)
     cropped_tm = t_minus[:,:t_minus.shape[1]//3]
     cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
     cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
 
-    t = cam.read()[1]
+    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+    t = cv2.imdecode(data, 1)
     cropped_t = t[:,:t.shape[1]//3]
     cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
     cropped_t3 = t[:,(2*t.shape[1])//3:]
 
-    t_plus = cam.read()[1]
+    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+    t_plus = cv2.imdecode(data, 1)
     cropped_tp = t_plus[:,:t_plus.shape[1]//3]
     cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
     cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
@@ -45,7 +53,7 @@ def detect_motion(serial=False):
           section3 = False
           t_minus, t, t_plus = t_list
           movement = diffImg(t_minus, t, t_plus)
-          movement = cv2.cvtColor(movement, cv2.COLOR_RGB2GRAY)
+          movement = cv2.cvtColor(movement, cv2.COLOR_BGR2GRAY) # not sure about RGB vs BGR?
           # make everything greater than 25 white and less black (binary black
           # or white)
           thresh = cv2.threshold(movement, 10, 255, cv2.THRESH_BINARY)[1]
@@ -86,7 +94,8 @@ def detect_motion(serial=False):
                   cxn.write([int(31)])
 
           # Read next image
-          whole_image = cam.read()[1]
+          data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+          whole_image = cv2.imdecode(data, 1)
           if i == 0:
               cropped = whole_image[:,:whole_image.shape[1]//3]
           elif i == 1:

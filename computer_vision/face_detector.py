@@ -1,7 +1,11 @@
 import numpy as np
 import cv2
-# from picamera import PiCamera
+from picamera import PiCamera
 from serial import Serial, SerialException
+
+# initialize Pi camera
+cam = PiCamera()
+rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
 
 # capture frames from the camera
 for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -11,16 +15,11 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 	timestamp = datetime.datetime.now()
 	text = "Unoccupied"
 
-
 # load XML classifiers
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
-# load input image/video in grayscale mode
-
-# cam = PiCamera()
-cam = cv2.VideoCapture(0)
-
+# load input image/video in grayscale
 img = cv2.imread('face.jpeg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
