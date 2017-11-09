@@ -1,8 +1,10 @@
 import cv2
-from picamera import PiCamera
+import picamera
+from picamera.array import PiRGBArray
 from serial import Serial, SerialException
 import io
 import numpy as np
+import time
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
@@ -14,30 +16,31 @@ def detect_motion(serial=False):
         PORT = '/dev/ttyACM1'
         cxn = Serial(PORT, baudrate=9600)
 
-    cam = picamera.PiCamera()
-    # Create the in-memory stream
-    stream = io.BytesIO()
-    camera.start_preview()
-    time.sleep(2)
-    camera.capture(stream, format='jpeg')
+    camera = picamera.PiCamera()
+    rawCapture = PiRGBArray(camera)
+
+    time.sleep(.1)
 
     winName = "Movement Indicator"
 
     # Read three images first and crop each into 3 sections:
-    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-    t_minus = cv2.imdecode(data, 1)
+    # grab an image from the camera
+    camera.capture(rawCapture, format="bgr")
+    t_minus = rawCapture.array
     cropped_tm = t_minus[:,:t_minus.shape[1]//3]
     cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
     cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
 
-    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-    t = cv2.imdecode(data, 1)
+    rawCapture = PiRGBArray(camera)
+    camera.capture(rawCapture, format="bgr")
+    t = rawCapture.array
     cropped_t = t[:,:t.shape[1]//3]
     cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
     cropped_t3 = t[:,(2*t.shape[1])//3:]
 
-    data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-    t_plus = cv2.imdecode(data, 1)
+    rawCapture = PiRGBArray(camera)
+    camera.capture(rawCapture, format="bgr")
+    t_plus = rawCapture.array
     cropped_tp = t_plus[:,:t_plus.shape[1]//3]
     cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
     cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
@@ -66,7 +69,7 @@ def detect_motion(serial=False):
 
           for c in cnts:
               # if the contour is too small, ignore it
-              if cv2.contourArea(c) < 500:
+              if cv2.contourArea(c) < 1000:
                   continue
 
               # draw the contours
@@ -76,44 +79,50 @@ def detect_motion(serial=False):
                   if "left" not in text:
                       text += "left"
                       section1 = True
+                      print('sees left')
               if i== 1:
                   if "middle" not in text:
                       text += "middle"
                       section2 = True
+                      print('sees middle')
               if i == 2:
                   if "right" not in text:
                       text += "right"
                       section3 = True
+                      print('sees right')
 
-          if serial:
-              if section1:
-                  cxn.write([int(11)])
-              if section2:
-                  cxn.write([int(21)])
-              if section3:
-                  cxn.write([int(31)])
+      if serial:
+          if section1:
+              cxn.write([int(11)])
+          if section2:
+              cxn.write([int(21)])
+          if section3:
+              cxn.write([int(31)])
 
-          # Read next image
-          data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-          whole_image = cv2.imdecode(data, 1)
-          if i == 0:
-              cropped = whole_image[:,:whole_image.shape[1]//3]
-          elif i == 1:
-              cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
-          elif i == 2:
-              cropped = whole_image[:,(2*whole_image.shape[1])//3:]
-          images[i] = [t, t_plus, cropped]
+      # Read next image
+      print("hi")
+      rawCapture = PiRGBArray(camera)
+      camera.capture(rawCapture, format="bgr")
+      whole_image = rawCapture.array
+      if i == 0:
+          cropped = whole_image[:,:whole_image.shape[1]//3]
+      elif i == 1:
+          cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
+      elif i == 2:
+          cropped = whole_image[:,(2*whole_image.shape[1])//3:]
+      images[i] = [t, t_plus, cropped]
 
-      key = cv2.waitKey(10)
-      if key == 27:
-        cv2.destroyWindow(winName)
-        break
+      #key = cv2.waitKey(10)
+      #if key == 27:
+      #  cv2.destroyWindow(winName)
+      #  break
 
       cv2.putText(images[0][0], "{}".format(text), (10, 20),
           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-      cv2.imshow("left pane", images[0][0])
-      cv2.imshow("middle pane", images[1][0])
-      cv2.imshow("right pane", images[2][0])
+      print("im showing")
+      cv2.imshow("left pane", t)
+      #cv2.imshow("middle pane", images[1][0])
+      #cv2.imshow("right pane", images[2][0])
 
     print( "Goodbye")
 
