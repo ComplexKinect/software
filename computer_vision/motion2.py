@@ -17,8 +17,8 @@ def detect_motion(serial=False):
         cxn = Serial(PORT, baudrate=9600)
 
     camera = picamera.PiCamera()
-    camera.resolution = (640, 480)
-    rawCapture = PiRGBArray(camera, size=(640,480))
+    camera.resolution = (2592, 1944)
+    rawCapture = PiRGBArray(camera, size=(2592,1944))
 
     time.sleep(.1)
 
