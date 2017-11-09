@@ -13,8 +13,8 @@ def detect_motion(serial=False):
     if serial:
         PORT = '/dev/ttyACM1'
         cxn = Serial(PORT, baudrate=9600)
-    # cam = PiCamera()
-    cam = cv2.VideoCapture(0)
+        camera = picamera.PiCamera('video.h264')
+        # cam = cv2.VideoCapture(0)
 
     winName = "Movement Indicator"
 
@@ -105,8 +105,6 @@ def detect_motion(serial=False):
       cv2.imshow("left pane", images[0][0])
       cv2.imshow("middle pane", images[1][0])
       cv2.imshow("right pane", images[2][0])
-
-
 
     print( "Goodbye")
 
