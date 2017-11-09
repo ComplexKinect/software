@@ -94,36 +94,36 @@ def detect_motion(serial=False):
                           section3 = True
                           print('sees right')
 
-          if serial:
-              if section1:
-                  cxn.write([int(11)])
-              if section2:
-                  cxn.write([int(21)])
-              if section3:
-                  cxn.write([int(31)])
+        if serial:
+            if section1:
+                cxn.write([int(11)])
+            if section2:
+                cxn.write([int(21)])
+            if section3:
+                cxn.write([int(31)])
 
-          # Read next image
-          print("hi")
-          whole_image = f.array
-          if i == 0:
-              cropped = whole_image[:,:whole_image.shape[1]//3]
-          elif i == 1:
-              cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
-          elif i == 2:
-              cropped = whole_image[:,(2*whole_image.shape[1])//3:]
-          images[i] = [t, t_plus, cropped]
+        # Read next image
+        print("hi")
+        whole_image = f.array
+        if i == 0:
+          cropped = whole_image[:,:whole_image.shape[1]//3]
+        elif i == 1:
+          cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
+        elif i == 2:
+          cropped = whole_image[:,(2*whole_image.shape[1])//3:]
+        images[i] = [t, t_plus, cropped]
 
-          #key = cv2.waitKey(10)
-          #if key == 27:
-          #  cv2.destroyWindow(winName)
-          #  break
+        #key = cv2.waitKey(10)
+        #if key == 27:
+        #  cv2.destroyWindow(winName)
+        #  break
 
-          cv2.putText(images[0][0], "{}".format(text), (10, 20),
-              cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-          print("im showing")
-          cv2.imshow("left pane", f.array)
-          #cv2.imshow("middle pane", images[1][0])
-          #cv2.imshow("right pane", images[2][0])
+        cv2.putText(images[0][0], "{}".format(text), (10, 20),
+          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        print("im showing")
+        cv2.imshow("left pane", f.array)
+        #cv2.imshow("middle pane", images[1][0])
+        #cv2.imshow("right pane", images[2][0])
 
     print( "Goodbye")
 
