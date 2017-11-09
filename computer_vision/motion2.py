@@ -122,6 +122,7 @@ def detect_motion(serial=False):
           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         print("im showing")
         cv2.imshow("left pane", f.array)
+        rawCapture.truncate(0)
         #cv2.imshow("middle pane", images[1][0])
         #cv2.imshow("right pane", images[2][0])
 
