@@ -29,30 +29,31 @@ def detect_motion(serial=False):
 
     for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = f.array
-        print("hi")
         #Read three images first and crop each into 3 sections:
-        grab an image from the camera
-        if t_minus == None:
+        #grab an image from the camera
+        if t_minus is None:
             t_minus = frame
             cropped_tm = t_minus[:,:t_minus.shape[1]//3]
             cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
             cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
+            rawCapture.truncate(0)
             continue
-        elif t == None:
+        elif t is None:
             t = frame
             cropped_t = t[:,:t.shape[1]//3]
             cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
             cropped_t3 = t[:,(2*t.shape[1])//3:]
+            rawCapture.truncate(0)
             continue
-        elif t_plus == None:
+        elif t_plus is None:
             t_plus = frame
             cropped_tp = t_plus[:,:t_plus.shape[1]//3]
             cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
             cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
-            continue
-
-        images = [[cropped_tm, cropped_t, cropped_tp], [cropped_tm2, cropped_t2, cropped_tp2],
+            rawCapture.truncate(0)
+            images = [[cropped_tm, cropped_t, cropped_tp], [cropped_tm2, cropped_t2, cropped_tp2],
                   [cropped_tm3, cropped_t3, cropped_tp3]]
+            continue
 
         text = ""
         for i, t_list in enumerate(images):
@@ -123,7 +124,6 @@ def detect_motion(serial=False):
         # cv2.putText(images[0][0], "{}".format(text), (10, 20),
         #   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         # print("im showing")
-        print("hiya")
         rawCapture.truncate(0)
         cv2.imshow("left pane", images[0][0])
         cv2.imshow("middle pane", images[1][0])
