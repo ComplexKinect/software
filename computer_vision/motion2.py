@@ -27,8 +27,9 @@ def detect_motion(serial=False):
     t = None
     t_plus = None
 
-    for f in camera.capture_continuous(rawCapture, format="bgr"):
+    for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = f.array
+        print("hi")
         # Read three images first and crop each into 3 sections:
         # grab an image from the camera
         # if t_minus == None:
@@ -114,16 +115,17 @@ def detect_motion(serial=False):
         #   cropped = whole_image[:,(2*whole_image.shape[1])//3:]
         # images[i] = [t, t_plus, cropped]
         #
-        # #key = cv2.waitKey(10)
-        # #if key == 27:
-        # #  cv2.destroyWindow(winName)
-        # #  break
+        key = cv2.waitKey(10)
+        if key == 27:
+          cv2.destroyWindow("left pane")
+          break
         #
         # cv2.putText(images[0][0], "{}".format(text), (10, 20),
         #   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         # print("im showing")
-        cv2.imshow("left pane", f.array)
+        print("hiya")
         rawCapture.truncate(0)
+        cv2.imshow("left pane", f.array)
         #cv2.imshow("middle pane", images[1][0])
         #cv2.imshow("right pane", images[2][0])
 
