@@ -1,5 +1,5 @@
 import cv2
-import picamera
+from picamera import PiCamera
 from picamera.array import PiRGBArray
 from serial import Serial, SerialException
 import io
@@ -16,8 +16,8 @@ def detect_motion(serial=False):
         PORT = '/dev/ttyACM1'
         cxn = Serial(PORT, baudrate=9600)
 
-    camera = picamera.PiCamera()
-    camera.resolution = (320,240)
+    camera = PiCamera()
+#    camera.resolution = (320,240)
     rawCapture = PiRGBArray(camera)
 
     time.sleep(.1)
