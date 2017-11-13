@@ -5,11 +5,61 @@ from serial import Serial, SerialException
 import io
 import numpy as np
 import time
+import threading
+
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
   d2 = cv2.absdiff(t1, t0)
   return cv2.bitwise_and(d1, d2)
+
+def send_serial_msg(message):
+    '''
+    write the given message over serial
+    '''
+    cxn.write([int(message)])
+    time.sleep(1)
+
+def get_msg(section1, section2, section3):
+    '''
+    gets the integer message we want to send over serial which corresponds
+    to which of the three sections has movement
+    '''
+    # motion in all sections
+    if section1 and section2 and section3:
+        msg = 7
+    # motion in any two of the 3 sections
+    elif section1 and section2:
+        msg = 6
+    elif section1 and section3:
+        msg = 5
+    elif section2 and section3:
+        msg = 4
+    # motion in any 1 of the sections
+    elif section3:
+        msg = 3
+    elif section2:
+        msg = 2
+    elif section1:
+        msg = 1
+    else:
+        msg = 0
+    return msg
+
+def start_serial_thread(message):
+    '''
+    function to start up and return the serial thread with the given message
+    representing values for movement in 3 sections
+    '''
+    serial_thread = threading.Thread(name='serial',
+                                     target=send_serial_msg,
+                                     args=(message))
+    try:
+        serial_thread.start()
+    except:
+        print("unable to start thread")
+
+    return serial_thread
 
 def detect_motion(serial=False):
     if serial:
@@ -26,6 +76,7 @@ def detect_motion(serial=False):
     t_minus = None
     t = None
     t_plus = None
+    first = True
 
     for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = f.array
@@ -98,12 +149,15 @@ def detect_motion(serial=False):
                           print('sees right')
 
               if serial:
-                if section1:
-                    cxn.write([int(11)])
-                if section2:
-                    cxn.write([int(21)])
-                if section3:
-                    cxn.write([int(31)])
+                  message = get_msg(section1, section2, section3)
+                  if first:
+                      first = False
+                      serial_thread = start_serial_thread(message)
+                  else:
+                      if serial_thread.isAlive():
+                          pass
+                      else:
+                          serial_thread = start_serial_thread(message)
 
               # Read next image
               whole_image = f.array
