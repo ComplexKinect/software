@@ -5,15 +5,15 @@ from serial import Serial, SerialException
 
 # initialize Pi camera
 cam = PiCamera()
-rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
-
-# capture frames from the camera
-for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-	# grab the raw NumPy array representing the image and initialize
-	# the timestamp and occupied/unoccupied text
-	frame = f.array
-	timestamp = datetime.datetime.now()
-	text = "Unoccupied"
+# rawCapture = PiRGBArray(cam, size=tuple(conf["resolution"]))
+#
+# # capture frames from the camera
+# for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+# 	# grab the raw NumPy array representing the image and initialize
+# 	# the timestamp and occupied/unoccupied text
+# 	frame = f.array
+# 	timestamp = datetime.datetime.now()
+# 	text = "Unoccupied"
 
 # load XML classifiers
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
