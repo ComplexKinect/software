@@ -102,8 +102,9 @@ def build_mag_output(data):
     maxmag = 0
     for d in data:
         if d[1] > maxmag:
-            maxmag = d[1]
-            maxfreq = d[0]
+            if d[0] >1000 and d[0]<5000:
+                maxmag = d[1]
+                maxfreq = d[0]
     print(maxmag)
     if maxmag >= 20000:
         return 7
