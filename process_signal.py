@@ -7,8 +7,8 @@ import numpy as np
 import threading
 from serial import Serial, SerialException
 
-PORT = '/dev/ttyACM1'
-cxn = Serial(PORT, baudrate=9600)
+#PORT = '/dev/ttyACM1'
+#cxn = Serial(PORT, baudrate=9600)
 
 def record_sound():
     CHUNK = 1024
@@ -51,29 +51,36 @@ def record_sound():
 
 
 def process_sound():
-    cos_sig = thinkdsp.CosSignal(freq=440, amp=1.0, offset=0)
-    sin_sig = thinkdsp.SinSignal(freq=880, amp=0.5, offset=0)
-    mix = sin_sig + cos_sig
+    # cos_sig = thinkdsp.CosSignal(freq=440, amp=1.0, offset=0)
+    # sin_sig = thinkdsp.SinSignal(freq=880, amp=0.5, offset=0)
+    # mix = sin_sig + cos_sig
 
-    wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
-    violin = thinkdsp.read_wave('tester.wav')
+    # wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
+    sound = thinkdsp.read_wave('tester.wav')
     # wave.write(filename='output.wav')
     # thinkdsp.play_wave(filename='input.wav',player='aplay')
 
-    spectrum = violin.make_spectrum()
+    spectrum = sound.make_spectrum()
     # # spectrum.low_pass(cutoff=600, factor=0.01)
     wave = spectrum.make_wave()
+    #TODO: is this code really necessary - looks to me like we are constructing
+    # a list with index, val where we already have an ordered list indexed with
+    # those vals - what's the point??
     ans = []
     for i, amp in enumerate(spectrum.amps):
         tmp = []
         tmp.append(i)
         tmp.append(amp)
         ans.append(tmp)
-    val = build_output(ans)
-    print(int(val))
-    cxn.write([int(val)])
+    val = build_mag_output(ans)
+    if val != 0:
+        print(int(val))
+        #cxn.write([int(val)])
 
-def build_output(data):
+def build_freq_output(data):
+    '''
+    determine what value to send over serial based on frequency of sound
+    '''
     maxmag = 0
     for d in data:
         if d[1] > maxmag:
@@ -87,6 +94,33 @@ def build_output(data):
         return 3
     elif maxfreq >= 600:
         return 4
+
+def build_mag_output(data):
+    '''
+    determine what value to send over serial based on loudness of sound
+    '''
+    maxmag = 0
+    for d in data:
+        if d[1] > maxmag:
+            if d[0] >1000 and d[0]<5000:
+                maxmag = d[1]
+                maxfreq = d[0]
+    print(maxmag)
+    if maxmag >= 20000:
+        return 7
+    elif maxmag >= 15000:
+        return 6
+    elif maxmag >= 10000:
+        return 5
+    elif maxmag >= 8000:
+        return 4
+    elif maxmag >= 5000:
+        return 3
+    elif maxmag >= 3000:
+        return 2
+    elif maxmag >= 1000:
+        return 1
+    return 0
 
 if __name__ == '__main__':
     while True:
