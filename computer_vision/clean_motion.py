@@ -143,6 +143,5 @@ def detect_motion(serial=False):
 
     print( "Goodbye")
 
-
 if __name__ == '__main__':
     detect_motion()
