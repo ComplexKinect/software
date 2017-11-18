@@ -4,11 +4,14 @@ PoE: Team Complex Kinect
 Fall 2017
 
 This file tracks motion in front of our structure using OpenCV.
-It captures images, divides those images into 3 panes, and correlates the
-images to 3 panes of our structure.
+It captures images, divides those images into panes, and tracks which panes
+contain motion at a given time. Depending on which panes contain motion, a
+different set of values is sent to Serial monitor via the functions we import
+from send_message.py.
 
-This file is called in send_message.py, which sends the data collected here
-to Serial monitor to make the motors on the structure move.
+The data sent over Serial monitor is then processed through Arduino code and
+tells the corresponding motors to move, causing the nodes in the corresponding
+panels to open and close.
 '''
 
 import cv2
@@ -19,6 +22,7 @@ import io
 import numpy as np
 import time
 import threading
+import send_serial_msg, get_msg, start_serial_thread from send_message
 
 
 def diffImg(t0, t1, t2):
@@ -46,6 +50,42 @@ def detect_motion(serial=False):
         frame = f.array
         # Read three images first and crop each into 3 sections:
         # Grab an image from the camera
+
+        pane1 = []
+        pane2 = []
+        pane3 = []
+            pane1 += cropped_t1
+            pane2 += cropped_t2
+            pane3 += cropped_t3
+
+        def crop_image(t,pane,num_panes):
+            '''t = image to crop
+            pane = which pane (left, middle, right)
+            num_panes = number of panes to crop into'''
+
+            t = frame
+            pane
+            cropped_t1 = t[:,:t.shape[1]//3]
+            cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
+            cropped_t3 = t[:,(2*t.shape[1])//3:]
+            rawCapture.truncate(0)
+
+        if t_minus is None:
+            cropImage(t_minus)
+            continue
+        if t is None:
+            cropImage(t)
+            continue
+        if t_plus is None:
+            cropImage(t_plus)
+            continue
+
+        # Function format, but not sure when to run it
+        # def run_crop(t):
+        #     if t is None:
+        #         cropImage(t)
+        #     continue
+
         if t_minus is None:
             t_minus = frame
             cropped_tm = t_minus[:,:t_minus.shape[1]//3]
@@ -124,6 +164,7 @@ def detect_motion(serial=False):
 
               # Read next image
               whole_image = f.array
+              cropped = crop_image(whole_image)
               if i == 0:
                   cropped = whole_image[:,:whole_image.shape[1]//3]
               elif i == 1:
@@ -136,7 +177,7 @@ def detect_motion(serial=False):
         if key == 27:
           cv2.destroyWindow("left pane")
           break
-        #
+
         # cv2.putText(images[0][0], "{}".format(text), (10, 20),
         #   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         # print("im showing")

@@ -3,12 +3,12 @@ Vicky McDermott and Gracey Wilson
 PoE: Team Complex Kinect
 Fall 2017
 
-This file gets data about motion in front of our structure from clean_motion.py
-and sends it to Serial monitor. Then our Arduino code tells the corresponding
+This file sends a message to Serial monitor. It is called in clean_motion.py,
+where the message is generated. Then our Arduino code tells the corresponding
 motors on the structure to move.
 '''
 
-import cleanMotion.py
+import diffImg, detect_motion from cleanMotion
 
 def send_serial_msg(message):
     '''
