@@ -51,82 +51,51 @@ def detect_motion(serial=False):
         # Read three images first and crop each into 3 sections:
         # Grab an image from the camera
 
-        pane1 = []
-        pane2 = []
-        pane3 = []
-            pane1 += cropped_t1
-            pane2 += cropped_t2
-            pane3 += cropped_t3
+        def return_cropped_list(t,num_frames):
+            images = []
+            for i in range(num_frames):
+                images.append(crop_image(t,i,num_frames))
+            rawCapture.truncate(0)    #resets camera
+            return images
 
-        def crop_image(t,pane,num_panes):
+        def crop_image(t,frame,num_frames):
             '''t = image to crop
             pane = which pane (left, middle, right)
             num_panes = number of panes to crop into'''
 
-            t = frame
-            pane
-            cropped_t1 = t[:,:t.shape[1]//3]
-            cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
-            cropped_t3 = t[:,(2*t.shape[1])//3:]
-            rawCapture.truncate(0)
-
-        if t_minus is None:
-            cropImage(t_minus)
-            continue
-        if t is None:
-            cropImage(t)
-            continue
-        if t_plus is None:
-            cropImage(t_plus)
-            continue
-
-        # Function format, but not sure when to run it
-        # def run_crop(t):
-        #     if t is None:
-        #         cropImage(t)
-        #     continue
+            cropped = t[:,t.shape[1]*frame//num_frames:t.shape[1]*frame+1//num_frames]   # all vertical values, horizontal values from edge to edge
+            return cropped
 
         if t_minus is None:
             t_minus = frame
-            cropped_tm = t_minus[:,:t_minus.shape[1]//3]
-            cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
-            cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
-            rawCapture.truncate(0)
+            cropped_tm1,cropped_tm2,cropped_tm3 = return_cropped_list(t_minus,3)
             continue
-        elif t is None:
+        if t is None:
             t = frame
-            cropped_t = t[:,:t.shape[1]//3]
-            cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
-            cropped_t3 = t[:,(2*t.shape[1])//3:]
-            rawCapture.truncate(0)
+            cropped_t1,cropped_t2,cropped_t3 = return_cropped_list(t,3)
             continue
-        elif t_plus is None:
+        if t_plus is None:
             t_plus = frame
-            cropped_tp = t_plus[:,:t_plus.shape[1]//3]
-            cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
-            cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
-            rawCapture.truncate(0)
-            images = [[cropped_tm, cropped_t, cropped_tp], [cropped_tm2, cropped_t2, cropped_tp2],
+            cropped_tp1,cropped_tp2,cropped_tp3 = return_cropped_list(t_plus,3)
+            images = [[cropped_tm1, cropped_t1, cropped_tp1], [cropped_tm2, cropped_t2, cropped_tp2],
                   [cropped_tm3, cropped_t3, cropped_tp3]]
             continue
 
-        text = ""
         for i, t_list in enumerate(images):
               section1 = False
               section2 = False
               section3 = False
               t_minus, t, t_plus = t_list
               movement = diffImg(t_minus, t, t_plus)
-              movement = cv2.cvtColor(movement, cv2.COLOR_BGR2GRAY) # not sure about RGB vs BGR?
-              # make everything greater than 25 white and less black (binary black or white)
+              movement = cv2.cvtColor(movement, cv2.COLOR_BGR2GRAY)
+              # make everything greater than 10 white and less black (binary black or white)
               thresh = cv2.threshold(movement, 10, 255, cv2.THRESH_BINARY)[1]
 
-              # dilate the thresholded image to fill in holes, then find contours
-              # on thresholded image
+              # dilate the thresholded image to fill in holes, then find contours on thresholded image
               thresh = cv2.dilate(thresh, None, iterations=2)
               _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-              # loop over the contours
 
+              # loop over the contours
               for c in cnts:
                   # if the contour is too small, ignore it
                   if cv2.contourArea(c) < 1000:
@@ -136,20 +105,14 @@ def detect_motion(serial=False):
                   cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
                   if i == 0:
-                      if "left" not in text:
-                          text += "left"
-                          section1 = True
-                          print('sees left')
+                      section1 = True
+                      print('sees left')
                   if i== 1:
-                      if "middle" not in text:
-                          text += "middle"
-                          section2 = True
-                          print('sees middle')
+                      section2 = True
+                      print('sees middle')
                   if i == 2:
-                      if "right" not in text:
-                          text += "right"
-                          section3 = True
-                          print('sees right')
+                      section3 = True
+                      print('sees right')
 
               if serial:
                   message = get_msg(section1, section2, section3)
@@ -164,23 +127,14 @@ def detect_motion(serial=False):
 
               # Read next image
               whole_image = f.array
-              cropped = crop_image(whole_image)
-              if i == 0:
-                  cropped = whole_image[:,:whole_image.shape[1]//3]
-              elif i == 1:
-                  cropped = whole_image[:,whole_image.shape[1]//3:(2*whole_image.shape[1])//3]
-              elif i == 2:
-                  cropped = whole_image[:,(2*whole_image.shape[1])//3:]
+              cropped = crop_image(whole_image,i,3)
               images[i] = [t, t_plus, cropped]
 
         key = cv2.waitKey(10)
-        if key == 27:
-          cv2.destroyWindow("left pane")
+        if key == 27:             # escape key
+          cv2.destroyWindow("left pane") #not sure why necessary but everything breaks without it
           break
 
-        # cv2.putText(images[0][0], "{}".format(text), (10, 20),
-        #   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        # print("im showing")
         rawCapture.truncate(0)
 
         cv2.imshow("left pane", images[0][0])
@@ -189,4 +143,6 @@ def detect_motion(serial=False):
 
     print( "Goodbye")
 
-detect_motion()
+
+if __name__ == '__main__':
+    detect_motion()

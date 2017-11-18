@@ -8,8 +8,6 @@ where the message is generated. Then our Arduino code tells the corresponding
 motors on the structure to move.
 '''
 
-import diffImg, detect_motion from cleanMotion
-
 def send_serial_msg(message):
     '''
     write the given message over serial
