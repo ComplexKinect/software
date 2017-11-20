@@ -1,4 +1,5 @@
 import cv2
+import time
 # need to install picamera on raspi first
 # from picamera import PiCamera
 from serial import Serial, SerialException
@@ -24,15 +25,21 @@ def detect_motion(serial=False):
     cropped_tm2 = t_minus[:,t_minus.shape[1]//3:(2*t_minus.shape[1])//3]
     cropped_tm3 = t_minus[:,(2*t_minus.shape[1])//3:]
 
+    time.sleep(1)
+
     t = cam.read()[1]
     cropped_t = t[:,:t.shape[1]//3]
     cropped_t2 = t[:,t.shape[1]//3:(2*t.shape[1])//3]
     cropped_t3 = t[:,(2*t.shape[1])//3:]
 
+    time.sleep(1)
+
     t_plus = cam.read()[1]
     cropped_tp = t_plus[:,:t_plus.shape[1]//3]
     cropped_tp2 = t_plus[:,t_plus.shape[1]//3:(2*t_plus.shape[1])//3]
     cropped_tp3 = t_plus[:,(2*t_plus.shape[1])//3:]
+
+    time.sleep(1)
 
     images = [[cropped_tm, cropped_t, cropped_tp], [cropped_tm2, cropped_t2, cropped_tp2],
               [cropped_tm3, cropped_t3, cropped_tp3]]
@@ -80,10 +87,16 @@ def detect_motion(serial=False):
           if serial:
               if section1:
                   cxn.write([int(11)])
+                  print(int(11))
+                #   time.sleep(1)
               if section2:
                   cxn.write([int(21)])
+                  print(int(21))
+                #   time.sleep(1)
               if section3:
                   cxn.write([int(31)])
+                  print(int(31))
+                #   time.sleep(1)
 
           # Read next image
           whole_image = cam.read()[1]
@@ -106,8 +119,9 @@ def detect_motion(serial=False):
       cv2.imshow("middle pane", images[1][0])
       cv2.imshow("right pane", images[2][0])
 
+    #   time.sleep(1)
 
 
     print( "Goodbye")
 
-detect_motion()
+detect_motion(serial=True)

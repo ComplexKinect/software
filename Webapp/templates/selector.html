@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Complex Kinect Web App</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+    <!-- Sup CSS for background -->
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='/style/extra.css')}}">
+
+  </head>
+
+
+  <body>
+    <br>
+    <br>
+    <br>
+    <div class='col-lg-12'>
+        <div class="mx-auto" style="width: 600px" align='center'>
+            <form align='center' method="post" action='/selector'>
+                <h3>Input Source</h3>
+                <div class="btn-group" data-toggle="buttons">
+                  <label class="btn btn-primary active btn-lg">
+                    <input type="checkbox" name="options" id="option1" autocomplete="off" value="camera" checked> Camera
+                  </label>
+                  <label class="btn btn-primary btn-lg">
+                    <input type="checkbox" name="options" id="option2" autocomplete="off" value="audio"> Audio
+                  </label>
+                  <label class="btn btn-primary btn-lg">
+                    <input type="checkbox" name="options" id="option3" autocomplete="off" value="both"> Camera & Audio
+                  </label>
+                </div>
+                <br>
+                <h3>Output Options</h3>
+                <div class="btn-group" data-toggle="buttons">
+                  <label class="btn btn-primary active btn-lg">
+                    <input type="checkbox" name="options" id="option4" autocomplete="off" value="lights" checked> Lights
+                  </label>
+                  <label class="btn btn-primary btn-lg">
+                    <input type="checkbox" name="options" id="option5" autocomplete="off" value="no_lights"> No Lights
+                  </label>
+                </div>
+
+                <br>
+                <button class="btn btn-success" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+
+        <!-- Footer -->
+        <br>
+        <br>
+        <footer>
+          <p align='center'>&copy; 2017 ComplexKinect <a class="btn btn-" href="http://poe.olin.edu/2017/complexkinect/" target='_blank' role="button">Learn More</a></p>
+        </footer>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+  </body>
+</html>
