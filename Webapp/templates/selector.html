@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 
     <!-- Sup CSS for background -->
-    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='/style/extra.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='style/extra.css')}}">
 
   </head>
 
@@ -25,24 +25,24 @@
             <form align='center' method="post" action='/selector'>
                 <h3>Input Source</h3>
                 <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-primary active btn-lg">
-                    <input type="radio" name="inputs" id="option1" autocomplete="off" value="camera" checked> Camera
+                  <label {% if i_select == 'camera'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="inputs" id="option1" autocomplete="off" value="camera" {% if i_select == 'camera'%} checked{% endif %}> Camera
                   </label>
-                  <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="inputs" id="option2" autocomplete="off" value="audio"> Audio
+                  <label {% if i_select == 'audio'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="inputs" id="option2" autocomplete="off" value="audio" {% if i_select == 'audio'%} checked{% endif %}> Audio
                   </label>
-                  <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="inputs" id="option3" autocomplete="off" value="both"> Camera & Audio
+                  <label {% if i_select == 'both'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="inputs" id="option3" autocomplete="off" value="both" {% if i_select == 'both'%} checked{% endif %}> Camera & Audio
                   </label>
                 </div>
                 <br>
                 <h3>Output Options</h3>
                 <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-primary active btn-lg">
-                    <input type="radio" name="outputs" id="option4" autocomplete="off" value="lights" checked> Lights
+                  <label {% if o_select == 'lights'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="outputs" id="option4" autocomplete="off" value="lights" {% if o_select == 'lights'%} checked{% endif %}> Lights
                   </label>
-                  <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="outputs" id="option5" autocomplete="off" value="no_lights"> No Lights
+                  <label {% if o_select == 'no_lights'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="outputs" id="option5" autocomplete="off" value="no_lights" {% if o_select == 'no_lights'%} checked{% endif %}> No Lights
                   </label>
                 </div>
 
