@@ -1,3 +1,20 @@
+'''
+Vicky McDermott and Peter Seger
+PoE: Team Complex Kinect
+Fall 2017
+
+This file tracks loudness of sound in front of our structure using thinkdsp.
+It records small audio segments and processes them to determine the largest
+magnitude and frequency of sound that has been heard in the previous few seconds.
+We make use of threading so that we are able to record and process sound
+simultaneously. We then send a value to serial corresponding to the loudness
+or frequency of the sound being recorded.
+
+The data sent over Serial monitor is then processed through Arduino code and
+tells the corresponding motors to move, causing the nodes to move differently
+with different levels of sound.
+'''
+
 import pyaudio
 import wave
 import time
@@ -7,12 +24,11 @@ import numpy as np
 import threading
 from serial import Serial, SerialException
 
-#PORT = '/dev/ttyACM1'
-#cxn = Serial(PORT, baudrate=9600)
 
 def record_sound():
+    '''Records a few seconds on audio and saves it to the tester.wav file.
+    '''
     CHUNK = 1024
-    # FORMAT = pyaudio.paInt16
     FORMAT = pyaudio.paUInt8
     CHANNELS = 2
     RATE = 44100
@@ -27,16 +43,12 @@ def record_sound():
                     input=True,
                     frames_per_buffer=CHUNK)
 
-    # print("* recording")
-
     frames = []
 
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
         data = stream.read(CHUNK)
         frames.append(data)
 
-    # print("* done recording")
-    # print(int.from_bytes(frames[0],byteorder='little'))
 
     stream.stop_stream()
     stream.close()
@@ -50,42 +62,45 @@ def record_sound():
     wf.close()
 
 
-def process_sound():
-    # cos_sig = thinkdsp.CosSignal(freq=440, amp=1.0, offset=0)
-    # sin_sig = thinkdsp.SinSignal(freq=880, amp=0.5, offset=0)
-    # mix = sin_sig + cos_sig
+def process_sound(serial):
+    '''Interprets the sound wave from the previous few seconds and sends an
+    appropriate value to serial if specified.
 
-    # wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
+    Args:
+        serial - boolean representing whether this function should be run with
+        serial messages
+    '''
+    if serial:
+        PORT = '/dev/ttyACM1'
+        cxn = Serial(PORT, baudrate=9600)
+
     sound = thinkdsp.read_wave('tester.wav')
-    # wave.write(filename='output.wav')
-    # thinkdsp.play_wave(filename='input.wav',player='aplay')
 
     spectrum = sound.make_spectrum()
-    # # spectrum.low_pass(cutoff=600, factor=0.01)
+
     wave = spectrum.make_wave()
-    #TODO: is this code really necessary - looks to me like we are constructing
-    # a list with index, val where we already have an ordered list indexed with
-    # those vals - what's the point??
-    ans = []
-    for i, amp in enumerate(spectrum.amps):
-        tmp = []
-        tmp.append(i)
-        tmp.append(amp)
-        ans.append(tmp)
-    val = build_mag_output(ans)
+
+    val = build_mag_output(spectrum.amps)
     if val != 0:
         print(int(val))
-        #cxn.write([int(val)])
+        if serial:
+            cxn.write([int(val)])
 
 def build_freq_output(data):
-    '''
-    determine what value to send over serial based on frequency of sound
+    '''Determines what value to send over serial based on frequency of sound.
+
+    Args:
+        data - a list in which each entry represents the amplitude magnitude of
+        the frequency at that index
+
+    Returns:
+        integer between 1 and 4 representing the frequency of the sound
     '''
     maxmag = 0
-    for d in data:
-        if d[1] > maxmag:
-            maxmag = d[1]
-            maxfreq = d[0]
+    for i, d in enumerate(data):
+        if d > maxmag:
+            maxmag = d
+            maxfreq = i
     if maxfreq < 200:
         return 1
     elif maxfreq >= 200 and maxfreq < 400:
@@ -96,15 +111,21 @@ def build_freq_output(data):
         return 4
 
 def build_mag_output(data):
-    '''
-    determine what value to send over serial based on loudness of sound
+    '''Determine what value to send over serial based on loudness of sound.
+
+    Args:
+        data - a list in which each entry represents the amplitude magnitude of
+        the frequency at that index
+
+    Returns:
+        integer between 0 and 7 representing the loudness of the sound
     '''
     maxmag = 0
-    for d in data:
-        if d[1] > maxmag:
-            if d[0] >1000 and d[0]<5000:
-                maxmag = d[1]
-                maxfreq = d[0]
+    for i, d in enumerate(data):
+        if d > maxmag:
+            if i >1000 and i<5000:
+                maxmag = d
+                maxfreq = i
     print(maxmag)
     if maxmag >= 20000:
         return 7
@@ -122,10 +143,16 @@ def build_mag_output(data):
         return 1
     return 0
 
-if __name__ == '__main__':
+def detect_sound(serial=False):
+    '''Starts the threading for processing and recording sound.
+
+    Args:
+        serial - (default False) boolean representing whether this function should
+        be run with serial messages
+    '''
     while True:
         record = threading.Thread(name='record', target=record_sound)
-        process = threading.Thread(name='process', target=process_sound)
+        process = threading.Thread(name='process', target=process_sound, args=(serial))
         try:
             record.start()
             process.start()
@@ -133,18 +160,6 @@ if __name__ == '__main__':
             print("unable to start thread")
         record.join()
         process.join()
-    # wave.play('temp.wav')
-    # spectrum.plot()
-    # thinkplot.show()
 
-
-    '''
-
-    violin = thinkdsp.read_wave('input.wav')
-	spectrum = violin.make_spectrum()
-	for i, amp in enumerate(spectrum.amps):
-	    print(i, amp)
-	spectrum.plot()
-    thinkplot.config(xlabel="Frequency", ylabel="Magnitude")
-	thinkplot.show()
-    '''
+if __name__ == '__main__':
+    detect_sound()
