@@ -16,12 +16,9 @@ def selector():
     if request.method == 'GET':
         return render_template('selector.html')
     if request.method == 'POST':
-        option = request.form.getlist('options')
-        test = ''
-        for o in option:
-            test = test + o
-        return test
-        # return render_template('selector.html')
+        inputs = request.form.getlist('inputs')
+        outputs = request.form.getlist('outputs')
+        return render_template('selector.html')
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@
 
   </head>
 
+<!-- {% if i_select == 'camera'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %} -->
 
   <body>
     <br>
@@ -25,23 +26,23 @@
                 <h3>Input Source</h3>
                 <div class="btn-group" data-toggle="buttons">
                   <label class="btn btn-primary active btn-lg">
-                    <input type="checkbox" name="options" id="option1" autocomplete="off" value="camera" checked> Camera
+                    <input type="radio" name="inputs" id="option1" autocomplete="off" value="camera" checked> Camera
                   </label>
                   <label class="btn btn-primary btn-lg">
-                    <input type="checkbox" name="options" id="option2" autocomplete="off" value="audio"> Audio
+                    <input type="radio" name="inputs" id="option2" autocomplete="off" value="audio"> Audio
                   </label>
                   <label class="btn btn-primary btn-lg">
-                    <input type="checkbox" name="options" id="option3" autocomplete="off" value="both"> Camera & Audio
+                    <input type="radio" name="inputs" id="option3" autocomplete="off" value="both"> Camera & Audio
                   </label>
                 </div>
                 <br>
                 <h3>Output Options</h3>
                 <div class="btn-group" data-toggle="buttons">
                   <label class="btn btn-primary active btn-lg">
-                    <input type="checkbox" name="options" id="option4" autocomplete="off" value="lights" checked> Lights
+                    <input type="radio" name="outputs" id="option4" autocomplete="off" value="lights" checked> Lights
                   </label>
                   <label class="btn btn-primary btn-lg">
-                    <input type="checkbox" name="options" id="option5" autocomplete="off" value="no_lights"> No Lights
+                    <input type="radio" name="outputs" id="option5" autocomplete="off" value="no_lights"> No Lights
                   </label>
                 </div>
 
