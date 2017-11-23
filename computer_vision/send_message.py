@@ -9,16 +9,25 @@ motors on the structure to move.
 '''
 
 def send_serial_msg(message):
-    '''
-    write the given message over serial
+    '''Write the given message over serial.
+
+    Args:
+        message - integer to be sent over serial
     '''
     cxn.write([int(message)])
     time.sleep(1)
 
 def get_msg(section1, section2, section3):
-    '''
-    gets the integer message we want to send over serial which corresponds
-    to which of the three sections has movement
+    '''Gets the integer message we want to send over serial which corresponds
+    to which of the three sections has movement.
+
+    Args:
+        section1: boolean representing motion in section 1
+        section2: boolean representing motion in section 2
+        section3: boolean representing motion in section 3
+
+    Returns:
+        integer between 0 and 7 representing which sections have movement
     '''
     # motion in all sections
     if section1 and section2 and section3:
@@ -42,9 +51,14 @@ def get_msg(section1, section2, section3):
     return msg
 
 def start_serial_thread(message):
-    '''
-    function to start up and return the serial thread with the given message
-    representing values for movement in 3 sections
+    '''Function to start up and return the serial thread with the given message
+    representing values for movement in 3 sections.
+
+    Args:
+        message - integer value to be sent over serial
+
+    Returns:
+        the serial thread which has been started up with the given message
     '''
     serial_thread = threading.Thread(name='serial',
                                      target=send_serial_msg,

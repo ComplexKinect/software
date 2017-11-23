@@ -26,11 +26,113 @@ import send_serial_msg, get_msg, start_serial_thread from send_message
 
 
 def diffImg(t0, t1, t2):
-  d1 = cv2.absdiff(t2, t1)
-  d2 = cv2.absdiff(t1, t0)
-  return cv2.bitwise_and(d1, d2)
+    '''Takes the difference of 3 images
+
+    Args:
+        t0 - first image in time to be differenced
+        t1 - sescond image in time
+        t2 - image from the most recent time
+
+    Returns:
+        an image array which is the conjunction of the difference of the
+        first two images and the difference of the second two images
+    '''
+    d1 = cv2.absdiff(t2, t1)
+    d2 = cv2.absdiff(t1, t0)
+    return cv2.bitwise_and(d1, d2)
+
+def return_cropped_list(t, num_frames):
+    '''Takes an image and a number of frames, crops the image into the given
+    number of frames, and returns a list of the cropped images that make up
+    the larger image
+
+    Args:
+        t - the image to be cropped
+        num_frames - number of frames the image should be cropped into
+
+    Returns:
+        a list of cropped images that make up the given image
+    '''
+    images = []
+    for i in range(num_frames):
+        images.append(crop_image(t, i, num_frames))
+    rawCapture.truncate(0)    #resets camera
+    return images
+
+def crop_image(t, frame, num_frames):
+    '''Takes an image, frame to get, and total number of frames the image is
+    being split into and returns a single cropped section of an image.
+
+    Args:
+        t - image to crop
+        pane - which pane (left, middle, right), represented by an integer
+        from 0 to num_frames-1
+        num_frames = number of frames to crop into
+
+    Returns:
+        an image array which is a cropped portion of the given image
+    '''
+    # all vertical values, horizontal values from edge to edge
+    cropped = t[:,t.shape[1]*frame//num_frames:t.shape[1]*frame+1//num_frames]
+    return cropped
+
+def get_contours(image):
+    '''Takes an image array and returns the contours found in that image array.
+
+    Args:
+        image - image array to find contours in
+
+    Returns:
+        list of contours in the given image
+    '''
+    # convert the image to black and white
+    movement = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # make everything greater than 10 white and less black (binary black or white)
+    thresh = cv2.threshold(movement, 10, 255, cv2.THRESH_BINARY)[1]
+
+    # dilate the thresholded image to fill in holes, then find contours on thresholded image
+    thresh = cv2.dilate(thresh, None, iterations=2)
+    _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    return cnts
+
+def start_serial_tasks(first, section1, section2, section3):
+    '''Constructs a message and starts the serial thread if it is not already
+    running.
+
+    Args:
+        first: boolean representing whether this is the first time this function
+        has been run
+        section1: boolean representing motion in section 1
+        section2: boolean representing motion in section 2
+        section3: boolean representing motion in section 3
+
+    Returns:
+        the value of first after this function has been run (should always be false)
+    '''
+    message = get_msg(section1, section2, section3)
+    if first:
+        # the first time, start a serial thread with the message
+        first = False
+        serial_thread = start_serial_thread(message)
+    else:
+        # from then on check if the serial thread is alive and only
+        # start a serial thread with the current message if one isn't
+        # already running
+        if serial_thread.isAlive():
+            pass
+        else:
+            serial_thread = start_serial_thread(message)
+    return first
 
 def detect_motion(serial=False):
+    '''Sets up the raspi camera to detect motion. Monitors for motion and sets
+    up a video stream showing the cropped sections of the camera stream.
+
+    Args:
+        serial - (default False) boolean representing whether this function should
+        be run with serial messages
+    '''
     if serial:
         PORT = '/dev/ttyACM1'
         cxn = Serial(PORT, baudrate=9600)
@@ -40,7 +142,6 @@ def detect_motion(serial=False):
 
     time.sleep(.1)
 
-    winName = "Movement Indicator"
     t_minus = None
     t = None
     t_plus = None
@@ -50,21 +151,6 @@ def detect_motion(serial=False):
         frame = f.array
         # Read three images first and crop each into 3 sections:
         # Grab an image from the camera
-
-        def return_cropped_list(t,num_frames):
-            images = []
-            for i in range(num_frames):
-                images.append(crop_image(t,i,num_frames))
-            rawCapture.truncate(0)    #resets camera
-            return images
-
-        def crop_image(t,frame,num_frames):
-            '''t = image to crop
-            pane = which pane (left, middle, right)
-            num_panes = number of panes to crop into'''
-
-            cropped = t[:,t.shape[1]*frame//num_frames:t.shape[1]*frame+1//num_frames]   # all vertical values, horizontal values from edge to edge
-            return cropped
 
         if t_minus is None:
             t_minus = frame
@@ -86,14 +172,10 @@ def detect_motion(serial=False):
               section2 = False
               section3 = False
               t_minus, t, t_plus = t_list
+              # take the difference of the past 3 images
               movement = diffImg(t_minus, t, t_plus)
-              movement = cv2.cvtColor(movement, cv2.COLOR_BGR2GRAY)
-              # make everything greater than 10 white and less black (binary black or white)
-              thresh = cv2.threshold(movement, 10, 255, cv2.THRESH_BINARY)[1]
 
-              # dilate the thresholded image to fill in holes, then find contours on thresholded image
-              thresh = cv2.dilate(thresh, None, iterations=2)
-              _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+              cnts = get_contours(movement)
 
               # loop over the contours
               for c in cnts:
@@ -104,6 +186,7 @@ def detect_motion(serial=False):
                   # draw the contours
                   cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
+                  # determine which section each contour is in
                   if i == 0:
                       section1 = True
                       print('sees left')
@@ -115,28 +198,23 @@ def detect_motion(serial=False):
                       print('sees right')
 
               if serial:
-                  message = get_msg(section1, section2, section3)
-                  if first:
-                      first = False
-                      serial_thread = start_serial_thread(message)
-                  else:
-                      if serial_thread.isAlive():
-                          pass
-                      else:
-                          serial_thread = start_serial_thread(message)
+                  first = start_serial_tasks(first, section1, section2, section3)
 
-              # Read next image
-              whole_image = f.array
-              cropped = crop_image(whole_image,i,3)
+              # Read next image and shift images back one
+              cropped = crop_image(frame,i,3)
               images[i] = [t, t_plus, cropped]
 
+        # set it up to wait for the escape key to exit
         key = cv2.waitKey(10)
-        if key == 27:             # escape key
-          cv2.destroyWindow("left pane") #not sure why necessary but everything breaks without it
+        # escape key
+        if key == 27:
+          cv2.destroyWindow("left pane")
           break
 
+        # resets the camera
         rawCapture.truncate(0)
 
+        # show the current 3 images
         cv2.imshow("left pane", images[0][0])
         cv2.imshow("middle pane", images[1][0])
         cv2.imshow("right pane", images[2][0])
