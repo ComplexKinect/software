@@ -17,6 +17,9 @@ def send_serial_msg(message):
     '''
     write the given message over serial
     '''
+    print(message)
+    PORT = '/dev/ttyACM0'
+    cxn = Serial(PORT, baudrate=9600)
     cxn.write([int(message)])
     time.sleep(1)
 
@@ -53,7 +56,7 @@ def start_serial_thread(message):
     '''
     serial_thread = threading.Thread(name='serial',
                                      target=send_serial_msg,
-                                     args=(message))
+                                     args=(message,))
     try:
         serial_thread.start()
     except:
@@ -62,9 +65,6 @@ def start_serial_thread(message):
     return serial_thread
 
 def detect_motion(serial=False):
-    if serial:
-        PORT = '/dev/ttyACM1'
-        cxn = Serial(PORT, baudrate=9600)
 
     camera = PiCamera()
 #    camera.resolution = (320,240)
@@ -133,33 +133,16 @@ def detect_motion(serial=False):
                   cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
                   if i == 0:
-                      if "left" not in text:
-                          text += "left"
-                          section1 = True
-                          print('sees left')
+                      section1 = True
+                      print('sees left')
                   if i== 1:
-                      if "middle" not in text:
-                          text += "middle"
-                          section2 = True
-                          print('sees middle')
+                      section2 = True
+                      print('sees middle')
                   if i == 2:
-                      if "right" not in text:
-                          text += "right"
-                          section3 = True
-                          print('sees right')
+                      section3 = True
+                      print('sees right')
 
-              if serial:
-                  message = get_msg(section1, section2, section3)
-                  if first:
-                      first = False
-                      serial_thread = start_serial_thread(message)
-                  else:
-                      if serial_thread.isAlive():
-                          pass
-                      else:
-                          serial_thread = start_serial_thread(message)
-
-              # Read next image
+                            # Read next image
               whole_image = f.array
               if i == 0:
                   cropped = whole_image[:,:whole_image.shape[1]//3]
@@ -168,6 +151,19 @@ def detect_motion(serial=False):
               elif i == 2:
                   cropped = whole_image[:,(2*whole_image.shape[1])//3:]
               images[i] = [t, t_plus, cropped]
+
+        if serial:
+                  message = get_msg(section1, section2, section3)
+                  if message != 0:
+                      if first:
+                          first = False
+                          serial_thread = start_serial_thread(message)
+                      else:
+                          if serial_thread.isAlive():
+                              pass
+                          else:
+                              serial_thread = start_serial_thread(message)
+
 
         key = cv2.waitKey(10)
         if key == 27:
@@ -185,4 +181,4 @@ def detect_motion(serial=False):
 
     print( "Goodbye")
 
-detect_motion()
+detect_motion(True)
