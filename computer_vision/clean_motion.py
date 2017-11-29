@@ -22,7 +22,7 @@ import io
 import numpy as np
 import time
 import threading
-import send_serial_msg, get_msg, start_serial_thread from send_message
+from send_message import send_serial_msg, get_msg, start_serial_thread
 
 
 def diffImg(t0, t1, t2):
@@ -41,7 +41,7 @@ def diffImg(t0, t1, t2):
     d2 = cv2.absdiff(t1, t0)
     return cv2.bitwise_and(d1, d2)
 
-def return_cropped_list(t, num_frames):
+def return_cropped_list(t, num_frames, rawCapture):
     '''Takes an image and a number of frames, crops the image into the given
     number of frames, and returns a list of the cropped images that make up
     the larger image
@@ -73,7 +73,7 @@ def crop_image(t, frame, num_frames):
         an image array which is a cropped portion of the given image
     '''
     # all vertical values, horizontal values from edge to edge
-    cropped = t[:,t.shape[1]*frame//num_frames:t.shape[1]*frame+1//num_frames]
+    cropped = t[:,(t.shape[1]*frame)//num_frames:t.shape[1]*(frame+1)//num_frames]
     return cropped
 
 def get_contours(image):
@@ -96,7 +96,7 @@ def get_contours(image):
 
     return cnts
 
-def start_serial_tasks(first, section1, section2, section3):
+def start_serial_tasks(serial_thread, first, section1, section2, section3):
     '''Constructs a message and starts the serial thread if it is not already
     running.
 
@@ -111,19 +111,20 @@ def start_serial_tasks(first, section1, section2, section3):
         the value of first after this function has been run (should always be false)
     '''
     message = get_msg(section1, section2, section3)
-    if first:
-        # the first time, start a serial thread with the message
-        first = False
-        serial_thread = start_serial_thread(message)
-    else:
-        # from then on check if the serial thread is alive and only
-        # start a serial thread with the current message if one isn't
-        # already running
-        if serial_thread.isAlive():
-            pass
-        else:
+    if message != 0:
+        if first:
+            # the first time, start a serial thread with the message
+            first = False
             serial_thread = start_serial_thread(message)
-    return first
+        else:
+            # from then on check if the serial thread is alive and only
+            # start a serial thread with the current message if one isn't
+            # already running
+            if serial_thread.isAlive():
+                pass
+            else:
+                serial_thread = start_serial_thread(message)
+    return serial_thread, first
 
 def detect_motion(serial=False):
     '''Sets up the raspi camera to detect motion. Monitors for motion and sets
@@ -133,9 +134,6 @@ def detect_motion(serial=False):
         serial - (default False) boolean representing whether this function should
         be run with serial messages
     '''
-    if serial:
-        PORT = '/dev/ttyACM1'
-        cxn = Serial(PORT, baudrate=9600)
 
     camera = PiCamera()
     rawCapture = PiRGBArray(camera)
@@ -146,6 +144,7 @@ def detect_motion(serial=False):
     t = None
     t_plus = None
     first = True
+    serial_thread = None
 
     for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = f.array
@@ -154,24 +153,26 @@ def detect_motion(serial=False):
 
         if t_minus is None:
             t_minus = frame
-            cropped_tm1,cropped_tm2,cropped_tm3 = return_cropped_list(t_minus,3)
+            cropped_tm1,cropped_tm2,cropped_tm3 = return_cropped_list(t_minus,3,rawCapture)
             continue
         if t is None:
             t = frame
-            cropped_t1,cropped_t2,cropped_t3 = return_cropped_list(t,3)
+            cropped_t1,cropped_t2,cropped_t3 = return_cropped_list(t,3,rawCapture)
             continue
         if t_plus is None:
             t_plus = frame
-            cropped_tp1,cropped_tp2,cropped_tp3 = return_cropped_list(t_plus,3)
+            cropped_tp1,cropped_tp2,cropped_tp3 = return_cropped_list(t_plus,3,rawCapture)
             images = [[cropped_tm1, cropped_t1, cropped_tp1], [cropped_tm2, cropped_t2, cropped_tp2],
                   [cropped_tm3, cropped_t3, cropped_tp3]]
             continue
 
+        section1 = False
+        section2 = False
+        section3 = False
         for i, t_list in enumerate(images):
-              section1 = False
-              section2 = False
-              section3 = False
+              
               t_minus, t, t_plus = t_list
+
               # take the difference of the past 3 images
               movement = diffImg(t_minus, t, t_plus)
 
@@ -197,18 +198,18 @@ def detect_motion(serial=False):
                       section3 = True
                       print('sees right')
 
-              if serial:
-                  first = start_serial_tasks(first, section1, section2, section3)
-
               # Read next image and shift images back one
               cropped = crop_image(frame,i,3)
               images[i] = [t, t_plus, cropped]
+
+        if serial:
+            serial_thread, first = start_serial_tasks(serial_thread, first, section1, section2, section3)
 
         # set it up to wait for the escape key to exit
         key = cv2.waitKey(10)
         # escape key
         if key == 27:
-          cv2.destroyWindow("left pane")
+          cv2.destroyWindow("right pane")
           break
 
         # resets the camera
@@ -222,4 +223,4 @@ def detect_motion(serial=False):
     print( "Goodbye")
 
 if __name__ == '__main__':
-    detect_motion()
+    detect_motion(True)

@@ -8,12 +8,19 @@ where the message is generated. Then our Arduino code tells the corresponding
 motors on the structure to move.
 '''
 
+import threading
+import time
+from serial import Serial
+
 def send_serial_msg(message):
     '''Write the given message over serial.
 
     Args:
         message - integer to be sent over serial
     '''
+    print(message)
+    PORT = '/dev/ttyACM0'
+    cxn = Serial(PORT, baudrate=9600)
     cxn.write([int(message)])
     time.sleep(1)
 
@@ -62,7 +69,7 @@ def start_serial_thread(message):
     '''
     serial_thread = threading.Thread(name='serial',
                                      target=send_serial_msg,
-                                     args=(message))
+                                     args=(message,))
     try:
         serial_thread.start()
     except:
