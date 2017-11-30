@@ -127,19 +127,19 @@ def build_mag_output(data):
                 maxmag = d
                 maxfreq = i
     print(maxmag)
-    if maxmag >= 20000:
+    if maxmag >= 400:
         return 7
-    elif maxmag >= 15000:
+    elif maxmag >= 300:
         return 6
-    elif maxmag >= 10000:
+    elif maxmag >= 200:
         return 5
-    elif maxmag >= 8000:
+    elif maxmag >= 150:
         return 4
-    elif maxmag >= 5000:
+    elif maxmag >= 100:
         return 3
-    elif maxmag >= 3000:
+    elif maxmag >= 50:
         return 2
-    elif maxmag >= 1000:
+    elif maxmag >= 25:
         return 1
     return 0
 
@@ -152,7 +152,7 @@ def detect_sound(serial=False):
     '''
     while True:
         record = threading.Thread(name='record', target=record_sound)
-        process = threading.Thread(name='process', target=process_sound, args=(serial))
+        process = threading.Thread(name='process', target=process_sound, args=(serial,))
         try:
             record.start()
             process.start()
