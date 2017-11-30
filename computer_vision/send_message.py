@@ -24,24 +24,27 @@ def send_serial_msg(message):
     cxn.write([int(message)])
     time.sleep(1)
 
-def get_msg(section1, section2, section3):
+def get_msg(sections, num_frames):
     '''Gets the integer message we want to send over serial which corresponds
     to which of the three sections has movement.
 
     Args:
-        section1: boolean representing motion in section 1
-        section2: boolean representing motion in section 2
-        section3: boolean representing motion in section 3
+        sections: list of bools representing motion in each pane
+        num_frames = number of frames the image has been cropped into
 
     Returns:
         integer between 0 and 7 representing which sections have movement
     '''
+    t_count = 0
+    for i in range(num_frames):
+        if sections[i]:
+            t_count += 1
     # motion in all sections
-    if section1 and section2 and section3:
-        msg = 7
-    # motion in any two of the 3 sections
-    elif section1 and section2:
-        msg = 6
+    if t_count == num_frames:
+        msg = 12
+    # motion in all but one of the sections
+elif t_coutn == num_frames-1:
+        msg = 11
     elif section1 and section3:
         msg = 5
     elif section2 and section3:
