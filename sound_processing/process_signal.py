@@ -71,7 +71,7 @@ def process_sound(serial):
         serial messages
     '''
     if serial:
-        PORT = '/dev/ttyACM1'
+        PORT = '/dev/ttyACM0'
         cxn = Serial(PORT, baudrate=9600)
 
     sound = thinkdsp.read_wave('tester.wav')
@@ -127,13 +127,13 @@ def build_mag_output(data):
                 maxmag = d
                 maxfreq = i
     print(maxmag)
-    if maxmag >= 400:
+    if maxmag >= 600:
         return 7
-    elif maxmag >= 300:
+    elif maxmag >= 500:
         return 6
-    elif maxmag >= 200:
+    elif maxmag >= 400:
         return 5
-    elif maxmag >= 150:
+    elif maxmag >= 300:
         return 4
     elif maxmag >= 100:
         return 3
@@ -162,4 +162,4 @@ def detect_sound(serial=False):
         process.join()
 
 if __name__ == '__main__':
-    detect_sound()
+    detect_sound(True)
