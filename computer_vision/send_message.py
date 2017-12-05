@@ -35,30 +35,14 @@ def get_msg(sections, num_frames):
     Returns:
         integer between 0 and 7 representing which sections have movement
     '''
-    t_count = 0
+
+    string_msg = ''
     for i in range(num_frames):
         if sections[i]:
-            t_count += 1
-    # motion in all sections
-    if t_count == num_frames:
-        msg = 12
-    # motion in all but one of the sections
-elif t_coutn == num_frames-1:
-        msg = 11
-    elif section1 and section3:
-        msg = 5
-    elif section2 and section3:
-        msg = 4
-    # motion in any 1 of the sections
-    elif section3:
-        msg = 3
-    elif section2:
-        msg = 2
-    elif section1:
-        msg = 1
-    else:
-        msg = 0
-    return msg
+            string_msg += '1'
+        else if section[i] == False:
+            string_msg += '0'
+    return string_msg
 
 def start_serial_thread(message):
     '''Function to start up and return the serial thread with the given message
