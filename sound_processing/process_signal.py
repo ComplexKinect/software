@@ -3,11 +3,11 @@ Vicky McDermott and Peter Seger
 PoE: Team Complex Kinect
 Fall 2017
 
-This file tracks loudness of sound in front of our structure using thinkdsp.
+This file tracks volume of sound in front of our structure using thinkdsp.
 It records small audio segments and processes them to determine the largest
 magnitude and frequency of sound that has been heard in the previous few seconds.
 We make use of threading so that we are able to record and process sound
-simultaneously. We then send a value to serial corresponding to the loudness
+simultaneously. We then send a value to serial corresponding to the volume
 or frequency of the sound being recorded.
 
 The data sent over Serial monitor is then processed through Arduino code and
@@ -95,6 +95,8 @@ def build_freq_output(data):
 
     Returns:
         integer between 1 and 4 representing the frequency of the sound
+
+    NOT CURRENTLY BEING CALLED
     '''
     maxmag = 0
     for i, d in enumerate(data):
@@ -111,14 +113,15 @@ def build_freq_output(data):
         return 4
 
 def build_mag_output(data):
-    '''Determine what value to send over serial based on loudness of sound.
+    '''Determine what value to send over serial based on volume of sound.
 
     Args:
         data - a list in which each entry represents the amplitude magnitude of
         the frequency at that index
 
     Returns:
-        integer between 0 and 7 representing the loudness of the sound
+        string of 0s and 1s representing the volume of sound, which will
+        correspond to how many panes to move in our Arduino code
     '''
     maxmag = 0
     for i, d in enumerate(data):
@@ -128,20 +131,18 @@ def build_mag_output(data):
                 maxfreq = i
     print(maxmag)
     if maxmag >= 600:
-        return 7
+        return '111111'
     elif maxmag >= 500:
-        return 6
+        return '111110'
     elif maxmag >= 400:
-        return 5
+        return '011110'
     elif maxmag >= 300:
-        return 4
+        return '001110'
     elif maxmag >= 100:
-        return 3
+        return '001100'
     elif maxmag >= 50:
-        return 2
-    elif maxmag >= 25:
-        return 1
-    return 0
+        return '000100'
+    return '000000'
 
 def detect_sound(serial=False):
     '''Starts the threading for processing and recording sound.

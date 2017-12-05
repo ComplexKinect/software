@@ -33,7 +33,7 @@ def get_msg(sections, num_frames):
         num_frames = number of frames the image has been cropped into
 
     Returns:
-        integer between 0 and 7 representing which sections have movement
+        string of 0s and 1s representing which sections have movement
     '''
 
     string_msg = ''
