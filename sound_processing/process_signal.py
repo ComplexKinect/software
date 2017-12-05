@@ -1,5 +1,5 @@
 '''
-Vicky McDermott and Peter Seger
+Vicky McDermott, Peter Seger and Gracey Wilson
 PoE: Team Complex Kinect
 Fall 2017
 
@@ -140,7 +140,7 @@ def build_mag_output(data):
         return '001110'
     elif maxmag >= 100:
         return '001100'
-    elif maxmag >= 50:
+    elif maxmag >= 25:
         return '000100'
     return '000000'
 
