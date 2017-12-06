@@ -18,8 +18,8 @@ with different levels of sound.
 import pyaudio
 import wave
 import time
-import thinkdsp
-import thinkplot
+import sound_processing.thinkdsp as thinkdsp
+import sound_processing.thinkplot as thinkplot
 import numpy as np
 import threading
 from serial import Serial, SerialException

@@ -4,6 +4,8 @@ import requests
 import time
 from flask import Flask, redirect, render_template, request, session, abort, url_for
 
+from sound_processing import process_signal
+
 app = Flask('flaskapp')
 
 @app.route('/', methods=['GET', 'POST'])
@@ -14,15 +16,15 @@ def home():
 @app.route('/selector', methods=['GET', 'POST'])
 def selector():
     if request.method == 'GET':
-        return render_template('selector.html', i_select = 'camera', o_select = 'lights')
+        return render_template('selector.html', i_select = 'off')
     if request.method == 'POST':
         inputs = request.form.getlist('inputs')
-        outputs = request.form.getlist('outputs')
         for i in inputs:
             print(i)
-        for o in outputs:
-            print(o)
-        return render_template('selector.html', i_select = inputs[0], o_select = outputs[0])
+        selected = inputs[0]
+        if selected == 'audio':
+            process_signal.detect_sound()
+        return render_template('selector.html', i_select = inputs[0])
 
 
 if __name__ == "__main__":
