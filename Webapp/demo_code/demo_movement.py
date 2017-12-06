@@ -23,7 +23,7 @@ def send_serial_msg(message):
     cxn.write([int(message)])
     time.sleep(3)
 
-def loop_msg(serial=False):
+def loop_msg():
     '''Sends messages in fun pattern, no sensor or camera data used.'''
 
     while True:

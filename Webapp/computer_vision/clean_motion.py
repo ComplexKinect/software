@@ -22,7 +22,7 @@ import io
 import numpy as np
 import time
 import threading
-from send_message import send_serial_msg, get_msg, start_serial_thread
+from computer_vision.send_message import send_serial_msg, get_msg, start_serial_thread
 
 
 def diffImg(t0, t1, t2):
