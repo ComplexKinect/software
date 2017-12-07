@@ -58,7 +58,7 @@ def start_process(target_method, p_to_start, p1_to_stop, p2_to_stop):
     else:
         p1_to_stop = stop_process(p1_to_stop)
         p2_to_stop = stop_process(p2_to_stop)
-        p_to_start = Process(target=target_method)
+        p_to_start = Process(target=target_method, args=(True,))
         p_to_start.start()
     return p_to_start, p1_to_stop, p2_to_stop
 

@@ -11,6 +11,8 @@ This file does not require any sensor/camera input - it is a demo.
 
 '''
 
+from serial import Serial
+
 def send_serial_msg(message):
     '''Write the given message over serial.
 
@@ -23,7 +25,7 @@ def send_serial_msg(message):
     cxn.write([int(message)])
     time.sleep(3)
 
-def loop_msg():
+def loop_msg(serial=True):
     '''Sends messages in fun pattern, no sensor or camera data used.'''
 
     while True:
