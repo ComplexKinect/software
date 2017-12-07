@@ -28,10 +28,10 @@ from serial import Serial, SerialException
 def record_sound():
     '''Records a few seconds on audio and saves it to the tester.wav file.
     '''
-    CHUNK = 1024
+    CHUNK = 2*1024
     FORMAT = pyaudio.paUInt8
-    CHANNELS = 2
-    RATE = 44100
+    CHANNELS = 1
+    RATE = 48000
     RECORD_SECONDS = 0.5
     WAVE_OUTPUT_FILENAME = "tester.wav"
 

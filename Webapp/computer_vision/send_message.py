@@ -40,7 +40,7 @@ def get_msg(sections, num_frames):
     for i in range(num_frames):
         if sections[i]:
             string_msg += '1'
-        else if section[i] == False:
+        elif sections[i] == False:
             string_msg += '0'
     return string_msg
 
