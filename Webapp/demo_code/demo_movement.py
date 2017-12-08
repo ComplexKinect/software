@@ -12,6 +12,7 @@ This file does not require any sensor/camera input - it is a demo.
 '''
 
 from serial import Serial
+import time
 
 def send_serial_msg(message):
     '''Write the given message over serial.
@@ -22,7 +23,8 @@ def send_serial_msg(message):
     print(message)
     PORT = '/dev/ttyACM0'
     cxn = Serial(PORT, baudrate=9600)
-    cxn.write([int(message)])
+    for num in message:
+        cxn.write([int(num)])
     time.sleep(3)
 
 def loop_msg(serial=True):
