@@ -170,7 +170,8 @@ def detect_motion(serial=False):
                 images[i].append(cropped_t[i])
                 images[i].append(cropped_tp[i])
             continue
-
+        
+        sections = []
         for i in range(num_panes):
             sections.append(False)
 
@@ -214,7 +215,7 @@ def detect_motion(serial=False):
 
         # show the current 6 images
         for i in range(num_panes):
-            cv2.imshow("pane", images[i][0])
+            cv2.imshow(str(i), images[i][0])
 
     print( "Goodbye")
 
