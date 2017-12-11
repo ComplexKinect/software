@@ -19,14 +19,12 @@ def send_serial_msg(message):
         message - integer to be sent over serial
     '''
     print(message)
-    PORT = '/dev/ttyACM1'
+    PORT = '/dev/ttyACM0'
     cxn = Serial(PORT, baudrate=9600)
-    cxn.write([int(message[5])])    # CHANGED
-    cxn.write([int(message[4])])    # CHANGED
-    cxn.write([int(message[3])])    # CHANGED
-    cxn.write([int(message[2])])    # CHANGED
-    cxn.write([int(message[1])])    # CHANGED
-    cxn.write([int(message[0])])    # CHANGED
+    cxn.write([int(message[:3])])    # CHANGED
+    while cxn.out_waiting > 0:
+        pass
+    cxn.write([int(message[3:])])    # CHANGED
     time.sleep(1)
 
 def get_msg(sections, num_frames):

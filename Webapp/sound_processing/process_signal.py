@@ -71,7 +71,7 @@ def process_sound(serial):
         serial messages
     '''
     if serial:
-        PORT = '/dev/ttyACM1'
+        PORT = '/dev/ttyACM0'
         cxn = Serial(PORT, baudrate=9600)
 
     sound = thinkdsp.read_wave('tester.wav')
@@ -84,8 +84,10 @@ def process_sound(serial):
     if val != 0:
         print(int(val))
         if serial:
-            cxn.write([int(val[:3])])
-            cxn.write([int(val[3:])])
+            cxn.write([int(val[5:2:-1])])    # CHANGED
+            while cxn.out_waiting > 0:
+                pass
+            cxn.write([int(val[2::-1])])    # CHANGED
 
 def build_freq_output(data):
     '''Determines what value to send over serial based on frequency of sound.

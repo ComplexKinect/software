@@ -23,9 +23,11 @@ def send_serial_msg(message):
     print(message)
     PORT = '/dev/ttyACM0'
     cxn = Serial(PORT, baudrate=9600)
-    for num in message:
-        cxn.write([int(num)])
-    time.sleep(3)
+    cxn.write([int(message[5:2:-1])])    # CHANGED
+    while cxn.out_waiting > 0:
+        pass
+    cxn.write([int(message[2::-1])])    # CHANGED
+    time.sleep(1)
 
 def loop_msg(serial=True):
     '''Sends messages in fun pattern, no sensor or camera data used.'''
