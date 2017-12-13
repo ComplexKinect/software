@@ -21,41 +21,31 @@ def send_serial_msg(message):
     print(message)
     PORT = '/dev/ttyACM0'
     cxn = Serial(PORT, baudrate=9600)
-    cxn.write([int(message)])
+    cxn.write([int(message[:3])])    # CHANGED
+    while cxn.out_waiting > 0:
+        pass
+    cxn.write([int(message[3:])])    # CHANGED
     time.sleep(1)
 
-def get_msg(section1, section2, section3):
+def get_msg(sections, num_frames):
     '''Gets the integer message we want to send over serial which corresponds
     to which of the three sections has movement.
 
     Args:
-        section1: boolean representing motion in section 1
-        section2: boolean representing motion in section 2
-        section3: boolean representing motion in section 3
+        sections: list of bools representing motion in each pane
+        num_frames = number of frames the image has been cropped into
 
     Returns:
-        integer between 0 and 7 representing which sections have movement
+        string of 0s and 1s representing which sections have movement
     '''
-    # motion in all sections
-    if section1 and section2 and section3:
-        msg = 7
-    # motion in any two of the 3 sections
-    elif section1 and section2:
-        msg = 6
-    elif section1 and section3:
-        msg = 5
-    elif section2 and section3:
-        msg = 4
-    # motion in any 1 of the sections
-    elif section3:
-        msg = 3
-    elif section2:
-        msg = 2
-    elif section1:
-        msg = 1
-    else:
-        msg = 0
-    return msg
+
+    string_msg = ''
+    for i in range(num_frames):
+        if sections[i]:
+            string_msg += '1'
+        elif sections[i] == False:
+            string_msg += '0'
+    return string_msg
 
 def start_serial_thread(message):
     '''Function to start up and return the serial thread with the given message

@@ -22,7 +22,7 @@ import io
 import numpy as np
 import time
 import threading
-from send_message import send_serial_msg, get_msg, start_serial_thread
+from computer_vision.send_message import send_serial_msg, get_msg, start_serial_thread
 
 
 def diffImg(t0, t1, t2):
@@ -96,21 +96,20 @@ def get_contours(image):
 
     return cnts
 
-def start_serial_tasks(serial_thread, first, section1, section2, section3):
+def start_serial_tasks(serial_thread, first, sections, num_frames):
     '''Constructs a message and starts the serial thread if it is not already
     running.
 
     Args:
         first: boolean representing whether this is the first time this function
         has been run
-        section1: boolean representing motion in section 1
-        section2: boolean representing motion in section 2
-        section3: boolean representing motion in section 3
+        sections: list of bools representing motion in each pane
+        num_frames = number of frames the image has been cropped into
 
     Returns:
         the value of first after this function has been run (should always be false)
     '''
-    message = get_msg(section1, section2, section3)
+    message = get_msg(sections, num_frames)
     if message != 0:
         if first:
             # the first time, start a serial thread with the message
@@ -145,6 +144,9 @@ def detect_motion(serial=False):
     t_plus = None
     first = True
     serial_thread = None
+    num_panes = 6
+    images = []
+    sections = []
 
     for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = f.array
@@ -153,24 +155,28 @@ def detect_motion(serial=False):
 
         if t_minus is None:
             t_minus = frame
-            cropped_tm1,cropped_tm2,cropped_tm3 = return_cropped_list(t_minus,3,rawCapture)
+            cropped_tm = return_cropped_list(t_minus,num_panes,rawCapture)
             continue
         if t is None:
             t = frame
-            cropped_t1,cropped_t2,cropped_t3 = return_cropped_list(t,3,rawCapture)
+            cropped_t = return_cropped_list(t,num_panes,rawCapture)
             continue
         if t_plus is None:
             t_plus = frame
-            cropped_tp1,cropped_tp2,cropped_tp3 = return_cropped_list(t_plus,3,rawCapture)
-            images = [[cropped_tm1, cropped_t1, cropped_tp1], [cropped_tm2, cropped_t2, cropped_tp2],
-                  [cropped_tm3, cropped_t3, cropped_tp3]]
+            cropped_tp = return_cropped_list(t_plus,num_panes,rawCapture)
+            for i in range(num_panes):
+                images.append([])
+                images[i].append(cropped_tm[i])
+                images[i].append(cropped_t[i])
+                images[i].append(cropped_tp[i])
             continue
+        
+        sections = []
+        for i in range(num_panes):
+            sections.append(False)
 
-        section1 = False
-        section2 = False
-        section3 = False
         for i, t_list in enumerate(images):
-              
+
               t_minus, t, t_plus = t_list
 
               # take the difference of the past 3 images
@@ -188,37 +194,28 @@ def detect_motion(serial=False):
                   cv2.drawContours(t, c, -1, (0, 255, 0), 2)
 
                   # determine which section each contour is in
-                  if i == 0:
-                      section1 = True
-                      print('sees left')
-                  if i== 1:
-                      section2 = True
-                      print('sees middle')
-                  if i == 2:
-                      section3 = True
-                      print('sees right')
+                  sections[i] = True
 
               # Read next image and shift images back one
-              cropped = crop_image(frame,i,3)
+              cropped = crop_image(frame,i,num_panes)
               images[i] = [t, t_plus, cropped]
 
         if serial:
-            serial_thread, first = start_serial_tasks(serial_thread, first, section1, section2, section3)
+            serial_thread, first = start_serial_tasks(serial_thread, first, sections, num_panes)
 
         # set it up to wait for the escape key to exit
         key = cv2.waitKey(10)
         # escape key
         if key == 27:
-          cv2.destroyWindow("right pane")
+          cv2.destroyWindow("pane")
           break
 
         # resets the camera
         rawCapture.truncate(0)
 
-        # show the current 3 images
-        cv2.imshow("left pane", images[0][0])
-        cv2.imshow("middle pane", images[1][0])
-        cv2.imshow("right pane", images[2][0])
+        # show the current 6 images
+        for i in range(num_panes):
+            cv2.imshow(str(i), images[i][0])
 
     print( "Goodbye")
 

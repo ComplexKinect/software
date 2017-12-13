@@ -25,26 +25,20 @@
             <form align='center' method="post" action='/selector'>
                 <h3>Input Source</h3>
                 <div class="btn-group" data-toggle="buttons">
+                  <label {% if i_select == 'off'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="inputs" id="option1" autocomplete="off" value="off" {% if i_select == 'off'%} checked{% endif %}> Motion Off
+                  </label>
                   <label {% if i_select == 'camera'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
                     <input type="radio" name="inputs" id="option1" autocomplete="off" value="camera" {% if i_select == 'camera'%} checked{% endif %}> Camera
                   </label>
                   <label {% if i_select == 'audio'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
                     <input type="radio" name="inputs" id="option2" autocomplete="off" value="audio" {% if i_select == 'audio'%} checked{% endif %}> Audio
                   </label>
-                  <label {% if i_select == 'both'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
-                    <input type="radio" name="inputs" id="option3" autocomplete="off" value="both" {% if i_select == 'both'%} checked{% endif %}> Camera & Audio
+                  <label {% if i_select == 'demo'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
+                    <input type="radio" name="inputs" id="option3" autocomplete="off" value="demo" {% if i_select == 'demo'%} checked{% endif %}> Demo Motion
                   </label>
                 </div>
                 <br>
-                <h3>Output Options</h3>
-                <div class="btn-group" data-toggle="buttons">
-                  <label {% if o_select == 'lights'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
-                    <input type="radio" name="outputs" id="option4" autocomplete="off" value="lights" {% if o_select == 'lights'%} checked{% endif %}> Lights
-                  </label>
-                  <label {% if o_select == 'no_lights'%} class = "btn btn-primary btn-lg active" {% else %} class = "btn btn-primary btn-lg" {% endif %}>
-                    <input type="radio" name="outputs" id="option5" autocomplete="off" value="no_lights" {% if o_select == 'no_lights'%} checked{% endif %}> No Lights
-                  </label>
-                </div>
 
                 <br>
                 <button class="btn btn-success" type="submit">Submit</button>
