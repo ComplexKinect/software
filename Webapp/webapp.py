@@ -1,3 +1,15 @@
+'''
+Vicky McDermott and Peter Seger
+PoE: Team Complex Kinect
+Fall 2017
+
+This file sets up the flask web application which allows the user of our
+structure to select which input mode they want our structure to respond to.
+A user can choose between four different modes on our web application: off
+modo, demo mode, mode which responds to audio, or mode which responds to
+motion (as detected by the structure's camera).
+'''
+
 import os
 import sys
 import requests
@@ -9,6 +21,7 @@ from sound_processing import process_signal
 from demo_code import demo_movement
 from computer_vision import clean_motion
 
+# set up variables for the flask app and the demo, audio, video processes
 app = Flask('flaskapp')
 global audio_p
 audio_p = None
@@ -19,11 +32,16 @@ demo_p = None
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    '''Renders the home html page for the first page of the web app
+    '''
     return render_template('home.html')
 
 
 @app.route('/selector', methods=['GET', 'POST'])
 def selector():
+    '''Starts the corresponding process when audio, demo, or video is chosen
+    on the form on the selector page of the web app
+    '''
     if request.method == 'GET':
         return render_template('selector.html', i_select = 'off')
     if request.method == 'POST':
@@ -47,12 +65,32 @@ def selector():
         return render_template('selector.html', i_select = inputs[0])
 
 def stop_process(my_process):
+    '''Stops a process which is currently running
+
+    Args:
+        my_process - the process you want to stop
+
+    Returns:
+        the process in its stopped form
+    '''
     if my_process != None and my_process.is_alive():
         my_process.terminate()
         return None
     return my_process
 
 def start_process(target_method, p_to_start, p1_to_stop, p2_to_stop):
+    '''Starts a process with the given target method and stops the other
+    two processes in case they are currently running
+
+    Args:
+        target_method - method to run for the given process
+        p_to_start - process to be started
+        p1_to_stop - process to be stopped
+        p2_to_stop - process to be stopped
+
+    Returns:
+        a list containing the started process and then the two stopped process
+    '''
     if p_to_start != None and p_to_start.is_alive():
         pass
     else:
